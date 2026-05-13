@@ -10,7 +10,7 @@ export async function getAIFeedback(itemName: string, sphereName: string) {
 지침: 이 분류가 과학적인 관점에서 적절한지 판단하고(정답 여부 포함), 그 이유를 카톡 스타일로 아주 짧고 친절하게 한 문장 정도로 설명해주세요. 이모지도 사용하세요.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-flash-latest",
+      model: "gemini-2.0-flash",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
 
@@ -40,7 +40,7 @@ export async function getAIChatResponse(message: string, currentContext?: string
     }));
 
     const response = await ai.models.generateContent({
-      model: "gemini-flash-latest",
+      model: "gemini-2.0-flash",
       contents: [
         ...contents,
         { role: 'user', parts: [{ text: message }] }
