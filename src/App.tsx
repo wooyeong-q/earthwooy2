@@ -2,17 +2,30 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Classifier from './components/Classifier';
 import Interaction from './components/Interaction';
-import AIChat from './components/AIChat';
-import { Globe2, Layers, Zap, MessageSquare, BookOpen } from 'lucide-react';
+import { Globe2, Layers, Zap } from 'lucide-react';
 import { cn } from './lib/utils';
+import { EARTH_COMPONENTS } from './constants';
+import { EarthComponent, SphereType } from './types';
 
-type Tab = 'classifier' | 'interaction' | 'chat';
+type Tab = 'classifier' | 'interaction';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('classifier');
 
+  // Lifted State for persistence
+  const [items, setItems] = useState<EarthComponent[]>(
+    [...EARTH_COMPONENTS].sort(() => Math.random() - 0.5)
+  );
+  const [placedItems, setPlacedItems] = useState<Record<SphereType, EarthComponent[]>>({
+    atmosphere: [],
+    geosphere: [],
+    hydrosphere: [],
+    biosphere: [],
+    exosphere: [],
+  });
+
   return (
-    <div className="min-h-screen bg-[#FDFDFC] text-stone-900 font-sans selection:bg-blue-100">
+    <div className="h-screen flex flex-col bg-[#FDFDFC] text-stone-900 font-sans selection:bg-blue-100 overflow-hidden">
       {/* Background decoration */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-30">
         <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-100 blur-[100px] rounded-full" />
@@ -20,83 +33,68 @@ export default function App() {
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-bottom border-stone-100 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <header className="flex-shrink-0 z-30 bg-white/80 backdrop-blur-md border-b border-stone-100 px-6 py-4 flex flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
             <Globe2 className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-black tracking-tight flex items-center gap-2">
+            <h1 className="text-xl font-black tracking-tight leading-none">
               Earth System Study
-              <span className="text-[10px] bg-stone-100 text-stone-500 py-0.5 px-2 rounded-full font-mono font-bold tracking-widest">BETA</span>
             </h1>
-            <p className="text-xs text-stone-400 font-medium font-mono uppercase tracking-wider">지구계 탐구 학습 프로그램</p>
+            <p className="text-[11px] text-stone-400 font-bold uppercase tracking-widest leading-none mt-1.5 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+              지구계 탐구 학습 프로그램
+            </p>
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <nav className="flex p-1 bg-stone-100 rounded-2xl shadow-inner border border-stone-200/50">
-          {[
-            { id: 'classifier' as Tab, label: '구성 요소 분류', icon: Layers },
-            { id: 'interaction' as Tab, label: '상호작용 탐구 (AI 피드백)', icon: Zap },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={cn(
-                "relative flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-all",
-                activeTab === tab.id ? "text-stone-900" : "text-stone-500 hover:text-stone-700"
-              )}
+        <div className="flex items-center gap-3">
+          {activeTab === 'interaction' && (
+            <button 
+              onClick={() => setActiveTab('classifier')}
+              className="flex items-center gap-2 px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-sm font-black transition-all"
             >
-              <tab.icon className="w-4 h-4" />
-              <span className="hidden sm:inline">{tab.label}</span>
-              {activeTab === tab.id && (
-                <motion.div
-                  layoutId="activeTab"
-                  className="absolute inset-0 bg-white rounded-xl shadow-sm border border-stone-200"
-                  style={{ zIndex: -1 }}
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
+              <Layers className="w-4 h-4" />
+              분류하기로 돌아가기
             </button>
-          ))}
-        </nav>
+          )}
+          <div className="hidden sm:block px-3 py-1 bg-stone-100 text-stone-500 rounded-lg text-[10px] font-black tracking-widest uppercase">
+            Science Room
+          </div>
+        </div>
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 py-10 px-6 max-w-[1700px] mx-auto min-h-[calc(100vh-140px)]">
+      <main className="relative z-10 flex-1 overflow-hidden px-4 py-3">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
-            initial={{ opacity: 0, y: 5 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            transition={{ duration: 0.2 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.25, type: "spring", damping: 25 }}
             className="w-full h-full"
           >
-            {activeTab === 'classifier' && <Classifier />}
+            {activeTab === 'classifier' && (
+              <Classifier 
+                items={items} 
+                setItems={setItems} 
+                placedItems={placedItems} 
+                setPlacedItems={setPlacedItems} 
+                onNext={() => setActiveTab('interaction')}
+              />
+            )}
             {activeTab === 'interaction' && <Interaction />}
           </motion.div>
         </AnimatePresence>
       </main>
 
-      {/* Footer */}
-      <footer className="py-12 border-t border-stone-100 bg-white/50">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 opacity-40">
-              <BookOpen className="w-4 h-4" />
-              <p className="text-xs font-bold uppercase tracking-widest">Science Guide</p>
-            </div>
-            <p className="text-sm text-stone-400 max-w-md">
-              지구계는 기권, 지권, 수권, 생물권, 외권의 5가지 권역으로 이루어져 있으며, 
-              각 권역은 서로 끊임없이 영향을 주고받으며 순환합니다.
-            </p>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <p className="text-[10px] text-stone-300 font-mono uppercase tracking-[0.2em]">Crafted with Google AI</p>
-            <p className="text-xs text-stone-400 font-medium">© 2026 Earth System Explorer. All rights reserved.</p>
-          </div>
+      {/* Footer (Simplified) */}
+      <footer className="flex-shrink-0 py-2 border-t border-stone-100 bg-white/50 px-6">
+        <div className="max-w-[1700px] mx-auto flex justify-between items-center">
+          <p className="text-[10px] text-stone-400 font-medium">© 2026 Earth System Explorer | Science Education Platform</p>
+          <p className="text-[10px] text-stone-300 font-mono uppercase tracking-widest leading-none">Gemini 3 Flash</p>
         </div>
       </footer>
     </div>

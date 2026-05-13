@@ -37,14 +37,14 @@ export default function AIChat() {
   return (
     <div className="flex flex-col h-full max-w-3xl mx-auto bg-white shadow-xl overflow-hidden">
       {/* Header */}
-      <div className="bg-[#FAE100] p-4 text-stone-900 flex items-center gap-3 border-b border-black/5">
-        <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-          <Bot className="w-6 h-6 text-[#1A1A1A]" />
+      <div className="bg-[#FAE100] p-2 text-stone-900 flex items-center gap-2 border-b border-black/5">
+        <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-sm">
+          <Bot className="w-5 h-5 text-[#1A1A1A]" />
         </div>
         <div>
-          <h3 className="font-black text-sm">지구계 AI 선생님</h3>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[9px] text-stone-600 font-black uppercase tracking-wider">MODEL: GEMINI 2.0 FLASH</span>
+          <h3 className="font-black text-[12px] leading-tight">지구계 AI 선생님</h3>
+          <div className="flex items-center gap-1">
+            <span className="text-[8px] text-stone-600 font-black uppercase tracking-wider">Model: Gemini 1.5 Flash</span>
           </div>
         </div>
       </div>
@@ -52,7 +52,7 @@ export default function AIChat() {
       {/* Messages area */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#BACEE0] scroll-smooth"
+        className="flex-1 overflow-y-auto p-3 space-y-3 bg-[#BACEE0] scroll-smooth"
       >
         {messages.map((msg, idx) => (
           <motion.div
@@ -65,13 +65,13 @@ export default function AIChat() {
             )}
           >
             {msg.role === 'model' && (
-              <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm border border-black/5">
-                <Bot className="w-5 h-5 text-stone-800" />
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm border border-black/5">
+                <Bot className="w-4 h-4 text-stone-800" />
               </div>
             )}
             
             <div className={cn(
-              "p-3 rounded-xl text-[14px] shadow-sm leading-relaxed relative",
+              "p-2.5 rounded-xl text-[13px] shadow-sm leading-relaxed relative",
               msg.role === 'user' 
                 ? "bg-[#FAE100] text-stone-900 ml-2" 
                 : "bg-white text-stone-800 border border-black/5 mr-2"
@@ -79,7 +79,7 @@ export default function AIChat() {
               <Markdown>{msg.content}</Markdown>
               {/* Triangle Tail */}
               <div className={cn(
-                "absolute top-3 w-0 h-0 border-[6px] border-transparent",
+                "absolute top-2 w-0 h-0 border-[5px] border-transparent",
                 msg.role === 'user' 
                   ? "left-full border-l-[#FAE100]" 
                   : "right-full border-r-white"
@@ -93,33 +93,33 @@ export default function AIChat() {
             animate={{ opacity: 1 }}
             className="flex items-start gap-2 mr-auto"
           >
-            <div className="w-9 h-9 bg-white/50 rounded-xl flex items-center justify-center">
-              <Loader2 className="w-4 h-4 text-stone-500 animate-spin" />
+            <div className="w-8 h-8 bg-white/50 rounded-lg flex items-center justify-center">
+              <Loader2 className="w-3 h-3 text-stone-500 animate-spin" />
             </div>
           </motion.div>
         )}
       </div>
 
       {/* Input Area */}
-      <div className="p-3 bg-white">
-        <div className="flex items-center gap-2 bg-stone-50 p-1.5 rounded-xl">
+      <div className="p-2 bg-white flex-shrink-0">
+        <div className="flex items-center gap-1.5 bg-stone-50 p-1 rounded-xl">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="선생님께 질문해보세요..."
-            className="flex-1 bg-transparent px-4 py-3 outline-none text-[15px]"
+            placeholder="질문해보세요..."
+            className="flex-1 bg-transparent px-3 py-2 outline-none text-[13px]"
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || isTyping}
-            className="p-3 bg-stone-900 text-white rounded-xl hover:bg-stone-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
+            className="p-2 bg-stone-900 text-white rounded-lg hover:bg-stone-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
           >
-            <Send className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <Send className="w-3.5 h-3.5" />
           </button>
         </div>
-        <p className="text-[10px] text-center text-stone-400 mt-2 flex items-center justify-center gap-1">
+        <p className="text-[10px] text-center text-stone-400 mt-1 flex items-center justify-center gap-1">
           <MessageCircle className="w-3 h-3" />
           질문하면 AI 선생님이 답변해 줍니다.
         </p>
