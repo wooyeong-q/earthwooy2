@@ -23,21 +23,21 @@ export default function Interaction() {
   );
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 p-4 max-w-[1700px] mx-auto h-[calc(100vh-160px)]">
+    <div className="flex flex-col lg:flex-row gap-4 p-4 max-w-[1700px] mx-auto h-[calc(100vh-120px)] overflow-hidden">
       {/* Main Interaction Area */}
-      <div className="flex-1 flex flex-col gap-4 bg-white p-6 rounded-[48px] border border-stone-100 shadow-xl shadow-stone-200/50 overflow-hidden">
-        <div className="text-center space-y-2">
+      <div className="flex-1 flex flex-col gap-3 bg-white p-5 rounded-[40px] border border-stone-100 shadow-lg shadow-stone-200/50 overflow-hidden">
+        <div className="text-center space-y-1">
           <div className="flex items-center justify-center gap-2">
-             <div className="p-2 bg-blue-50 rounded-xl">
-                <RefreshCw className="w-5 h-5 text-blue-500 animate-spin-slow" />
+             <div className="p-1.5 bg-blue-50 rounded-lg">
+                <RefreshCw className="w-4 h-4 text-blue-500 animate-spin-slow" />
              </div>
-             <h2 className="text-2xl font-black tracking-tight">지구계 상호작용 탐구</h2>
+             <h2 className="text-xl font-black tracking-tight">지구계 상호작용 탐구</h2>
           </div>
-          <p className="text-stone-500 font-bold text-sm">두 개의 권역을 선택하여 상호작용을 알아보세요.</p>
+          <p className="text-stone-500 font-bold text-xs">두 개의 권역을 선택하여 상호작용을 알아보세요.</p>
         </div>
 
         {/* Sphere Selector Row */}
-        <div className="flex justify-center flex-wrap gap-2 px-2">
+        <div className="flex justify-center flex-wrap gap-1.5 px-1">
           {Object.entries(SPHERES).map(([key, sphere]) => {
             const Icon = ICON_MAP[sphere.icon as keyof typeof ICON_MAP];
             const isSelected = selectedFrom === key || selectedTo === key;
@@ -57,20 +57,20 @@ export default function Interaction() {
                   }
                 }}
                 className={cn(
-                  "flex flex-col items-center p-3 min-w-[110px] rounded-[24px] border-2 transition-all gap-2 group",
+                  "flex flex-col items-center p-2.5 min-w-[100px] rounded-[20px] border-2 transition-all gap-1.5 group",
                   isSelected 
-                    ? "bg-white border-stone-900 shadow-md scale-105" 
+                    ? "bg-white border-stone-900 shadow-sm scale-105" 
                     : "bg-stone-50 border-transparent hover:border-stone-200 hover:bg-white"
                 )}
               >
                 <div className={cn(
-                  "w-12 h-12 rounded-[18px] flex items-center justify-center transition-all",
-                  isSelected ? "bg-stone-900 shadow-lg" : "bg-white shadow-sm group-hover:shadow-md"
+                  "w-10 h-10 rounded-[14px] flex items-center justify-center transition-all",
+                  isSelected ? "bg-stone-900 shadow-md" : "bg-white shadow-sm group-hover:shadow-md"
                 )}>
-                  <Icon className={cn("w-6 h-6", isSelected ? "text-white" : "text-stone-400")} />
+                  <Icon className={cn("w-5 h-5", isSelected ? "text-white" : "text-stone-400")} />
                 </div>
                 <div className="text-center">
-                  <span className={cn("text-sm font-black", isSelected ? "text-stone-900" : "text-stone-400")}>
+                  <span className={cn("text-[13px] font-black", isSelected ? "text-stone-900" : "text-stone-400")}>
                     {sphere.name}
                   </span>
                 </div>
@@ -103,17 +103,17 @@ export default function Interaction() {
                 exit={{ opacity: 0, y: -20 }}
                 className="flex-1 flex flex-col items-center justify-center p-4 gap-4"
               >
-                <div className="flex items-center justify-center gap-8 max-w-xl w-full">
-                   <div className="flex-1 text-center bg-white p-4 rounded-[24px] border border-stone-100 shadow-sm relative">
-                      <div className={cn("absolute -top-2 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[8px] font-black text-white", SPHERES[selectedFrom].color.split(' ')[2])}>SPHERE A</div>
-                      <span className="text-xl font-black">{SPHERES[selectedFrom].name}</span>
+                <div className="flex items-center justify-center gap-4 max-w-xl w-full">
+                   <div className="flex-1 text-center bg-white p-3 rounded-[20px] border border-stone-100 shadow-sm relative">
+                      <div className={cn("absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[7px] font-black text-white", SPHERES[selectedFrom].color.split(' ')[2])}>SPHERE A</div>
+                      <span className="text-lg font-black">{SPHERES[selectedFrom].name}</span>
                    </div>
-                   <div className="w-10 h-10 bg-stone-900 rounded-full flex items-center justify-center text-white shadow-lg">
-                      <ArrowRight className="w-5 h-5" />
+                   <div className="w-8 h-8 bg-stone-900 rounded-full flex items-center justify-center text-white shadow-md">
+                      <ArrowRight className="w-4 h-4" />
                    </div>
-                   <div className="flex-1 text-center bg-white p-4 rounded-[24px] border border-stone-100 shadow-sm relative">
-                      <div className={cn("absolute -top-2 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[8px] font-black text-white", SPHERES[selectedTo].color.split(' ')[2])}>SPHERE B</div>
-                      <span className="text-xl font-black">{SPHERES[selectedTo].name}</span>
+                   <div className="flex-1 text-center bg-white p-3 rounded-[20px] border border-stone-100 shadow-sm relative">
+                      <div className={cn("absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[7px] font-black text-white", SPHERES[selectedTo].color.split(' ')[2])}>SPHERE B</div>
+                      <span className="text-lg font-black">{SPHERES[selectedTo].name}</span>
                    </div>
                 </div>
  
@@ -122,14 +122,14 @@ export default function Interaction() {
                     <motion.div 
                       initial={{ scale: 0.98 }}
                       animate={{ scale: 1 }}
-                      className="bg-stone-900 text-white p-6 rounded-[36px] shadow-xl relative overflow-hidden"
+                      className="bg-stone-900 text-white p-5 rounded-[32px] shadow-lg relative overflow-hidden"
                     >
-                       <Zap className="absolute -top-4 -right-4 w-24 h-24 text-white/5 rotate-12" />
-                       <div className="relative z-10 space-y-2 text-center">
-                          <h4 className="text-2xl font-black text-blue-400">
+                       <Zap className="absolute -top-2 -right-2 w-16 h-16 text-white/5 rotate-12" />
+                       <div className="relative z-10 space-y-1 text-center">
+                          <h4 className="text-xl font-black text-blue-400">
                              {foundInteraction.title}
                           </h4>
-                          <p className="text-base text-stone-300 leading-relaxed max-w-lg mx-auto">
+                          <p className="text-sm text-stone-300 leading-snug max-w-lg mx-auto">
                              {foundInteraction.description}
                           </p>
                        </div>
