@@ -44,7 +44,7 @@ export default function AIChat() {
         <div>
           <h3 className="font-black text-sm">지구계 AI 선생님</h3>
           <div className="flex items-center gap-1.5">
-            <span className="text-[9px] text-stone-600 font-black uppercase tracking-wider">MODEL: GEMINI 1.5 FLASH</span>
+            <span className="text-[9px] text-stone-600 font-black uppercase tracking-wider">MODEL: GEMINI 2.0 FLASH</span>
           </div>
         </div>
       </div>
