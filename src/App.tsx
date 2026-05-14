@@ -85,7 +85,7 @@ export default function App() {
                 onNext={() => setActiveTab('interaction')}
               />
             )}
-            {activeTab === 'interaction' && <Interaction />}
+            {activeTab === 'interaction' && <Interaction placedItems={placedItems} />}
           </motion.div>
         </AnimatePresence>
       </main>

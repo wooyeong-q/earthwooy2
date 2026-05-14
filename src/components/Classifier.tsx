@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { EARTH_COMPONENTS, SPHERES } from '../constants';
 import { EarthComponent, SphereType } from '../types';
-import { getAIFeedback } from '../services/geminiService';
-import { Cloud, Mountain, Droplets, Leaf, Moon, CheckCircle2, XCircle, Info, Plus, ChevronRight, Globe2, Bot } from 'lucide-react';
+import { getAIFeedback, getGlobalEvaluation } from '../services/geminiService';
+import { Cloud, Mountain, Droplets, Leaf, Moon, CheckCircle2, XCircle, Info, Plus, ChevronRight, Globe2, Bot, Sparkles, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 const ICON_MAP = {
@@ -24,7 +24,9 @@ interface ClassifierProps {
 
 export default function Classifier({ items, setItems, placedItems, setPlacedItems, onNext }: ClassifierProps) {
   const [feedback, setFeedback] = useState<{ text: string } | null>(null);
+  const [globalFeedback, setGlobalFeedback] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGlobalLoading, setIsGlobalLoading] = useState(false);
   const [newItemName, setNewItemName] = useState('');
 
   const handleDrop = (item: EarthComponent, targetSphere: SphereType, sourceSphere?: SphereType) => {
@@ -57,6 +59,16 @@ export default function Classifier({ items, setItems, placedItems, setPlacedItem
     setTimeout(() => {
       setFeedback(null);
     }, 4500);
+  };
+
+  const evaluateAll = async () => {
+    const totalPlacedCount = Object.values(placedItems).reduce((sum, list) => sum + list.length, 0);
+    if (totalPlacedCount === 0) return;
+
+    setIsGlobalLoading(true);
+    const result = await getGlobalEvaluation(placedItems);
+    setGlobalFeedback(result);
+    setIsGlobalLoading(false);
   };
 
   const addNewItem = (e: React.FormEvent) => {
@@ -207,13 +219,29 @@ export default function Classifier({ items, setItems, placedItems, setPlacedItem
             </form>
           </div>
           
-          <button 
-            onClick={onNext}
-            className="flex items-center gap-3 px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white rounded-[24px] text-base font-black shadow-lg shadow-blue-200 transition-all group active:scale-95"
-          >
-            상호작용 탐구하러 가기
-            <ChevronRight className="w-6 h-6 group-hover:translate-x-1.5 transition-transform" />
-          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={evaluateAll}
+              disabled={isGlobalLoading || Object.values(placedItems).every(l => l.length === 0)}
+              className={cn(
+                "flex items-center gap-2 px-6 py-4 rounded-2xl text-sm font-black transition-all active:scale-95",
+                isGlobalLoading 
+                ? "bg-amber-100 text-amber-600 animate-pulse" 
+                : "bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-200"
+              )}
+            >
+              <Sparkles className={cn("w-5 h-5", isGlobalLoading && "animate-spin")} />
+              {isGlobalLoading ? '선생님이 점검 중...' : '전체 결과 점검하기'}
+            </button>
+
+            <button 
+              onClick={onNext}
+              className="flex items-center gap-3 px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white rounded-[24px] text-base font-black shadow-lg shadow-blue-200 transition-all group active:scale-95"
+            >
+              상호작용 탐구하러 가기
+              <ChevronRight className="w-6 h-6 group-hover:translate-x-1.5 transition-transform" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -238,6 +266,60 @@ export default function Classifier({ items, setItems, placedItems, setPlacedItem
               <p className="text-stone-800 font-bold text-base leading-tight">{feedback.text}</p>
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Global Results Feedback Modal */}
+      <AnimatePresence>
+        {globalFeedback && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setGlobalFeedback(null)}
+              className="absolute inset-0 bg-stone-900/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden border border-amber-100"
+            >
+              <div className="bg-amber-500 p-8 text-white relative overflow-hidden">
+                <Sparkles className="absolute -top-4 -right-4 w-32 h-32 opacity-20 rotate-12" />
+                <div className="relative z-10 flex items-center gap-4">
+                  <div className="w-16 h-16 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-md">
+                    <Bot className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black">지구쌤의 정밀 점검 결과</h3>
+                    <p className="text-amber-100 font-bold text-sm">분류한 내용 중에 고칠 부분은 없는지 확인해볼까요?</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setGlobalFeedback(null)}
+                  className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="p-8">
+                <div className="bg-stone-50 p-6 rounded-3xl border border-stone-100 min-h-[100px]">
+                  <p className="text-stone-800 font-bold text-lg leading-relaxed whitespace-pre-wrap">
+                    {globalFeedback}
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setGlobalFeedback(null)}
+                  className="w-full mt-6 py-4 bg-stone-900 text-white rounded-2xl font-black hover:bg-stone-800 transition-colors shadow-lg shadow-stone-200"
+                >
+                  확인했어요!
+                </button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>
