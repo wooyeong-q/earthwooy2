@@ -6,6 +6,22 @@ import { GoogleGenAI } from "@google/genai";
 
 dotenv.config();
 
+// Initialize the Gemini client on the server side with proper User-Agent header for AI Studio
+const getGeminiClient = () => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY가 서버 환경변수에 설정되어 있지 않습니다. .env 파일에 GEMINI_API_KEY=\"내_API_키\" 형식으로 입력해 주세요.");
+  }
+  return new GoogleGenAI({
+    apiKey: apiKey,
+    httpOptions: {
+      headers: {
+        'User-Agent': 'aistudio-build',
+      }
+    }
+  });
+};
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
@@ -19,17 +35,14 @@ async function startServer() {
       if (!itemName || !sphereName) {
         return res.status(400).json({ error: "itemName and sphereName are required." });
       }
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        return res.status(500).json({ error: "GEMINI_API_KEY environment variable is not set on the server." });
-      }
-      const ai = new GoogleGenAI({ apiKey });
+      
+      const ai = getGeminiClient();
       const prompt = `당신은 중학교 과학 교사 '지구쌤'입니다. 
 상황: 학생이 '${itemName}' 요소를 '${sphereName}'권으로 분류했습니다.
 지침: 이 분류가 과학적인 관점에서 적절한지 판단하고(정답 여부 포함), 그 이유를 카톡 스타일로 아주 짧고 친절하게 한 문장 정도로 설명해주세요. 이모지도 사용하세요.`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview", 
+        model: "gemini-3.5-flash", 
         contents: [{ role: "user", parts: [{ text: prompt }] }],
       });
 
@@ -43,11 +56,8 @@ async function startServer() {
   app.post("/api/gemini/chat", async (req, res) => {
     try {
       const { message, currentContext, history } = req.body;
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        return res.status(500).json({ error: "GEMINI_API_KEY environment variable is not set on the server." });
-      }
-      const ai = new GoogleGenAI({ apiKey });
+      
+      const ai = getGeminiClient();
       const systemInstruction = `당신은 초등/중학생을 가르치는 친절하고 짧게 말하는 과학 선생님 '지구쌤'입니다.
 핵심 규칙:
 1. 답변은 카톡 스타일로 아주 짧고 친절하게 하세요.
@@ -62,7 +72,7 @@ async function startServer() {
       }));
 
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-3.5-flash",
         contents: [
           ...contents,
           { role: 'user', parts: [{ text: message }] }
@@ -85,11 +95,8 @@ async function startServer() {
       if (!placedItems) {
         return res.status(400).json({ error: "placedItems are required." });
       }
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        return res.status(500).json({ error: "GEMINI_API_KEY environment variable is not set on the server." });
-      }
-      const ai = new GoogleGenAI({ apiKey });
+      
+      const ai = getGeminiClient();
       const summary = Object.entries(placedItems)
         .map(([sphere, items]: [string, any]) => `${sphere}: ${items.map((i: any) => i.name).join(", ")}`)
         .join("\n");
@@ -106,7 +113,7 @@ ${summary}
 5. 이모지를 적절히 섞어서 3~5문장 내외로 작성하세요.`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-3.5-flash",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
       });
 
