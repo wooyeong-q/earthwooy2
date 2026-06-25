@@ -2,15 +2,10 @@ import { ChatMessage } from "../types";
 import { GoogleGenAI } from "@google/genai";
 
 // Initialize client-side Gemini client lazily if fallback key is provided
-let clientSideAI: any = null;
-
 function getClientSideAI() {
-  if (clientSideAI) return clientSideAI;
-  
-  const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || (window as any).GEMINI_API_KEY;
+  const apiKey = localStorage.getItem('USER_GEMINI_API_KEY') || (import.meta as any).env?.VITE_GEMINI_API_KEY || (window as any).GEMINI_API_KEY;
   if (apiKey) {
-    clientSideAI = new GoogleGenAI({ apiKey });
-    return clientSideAI;
+    return new GoogleGenAI({ apiKey });
   }
   return null;
 }
