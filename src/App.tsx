@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Classifier from './components/Classifier';
 import Interaction from './components/Interaction';
-import { Globe2, Layers, Zap } from 'lucide-react';
+import SettingsModal from './components/SettingsModal';
+import { Globe2, Layers, Settings } from 'lucide-react';
 import { cn } from './lib/utils';
 import { EARTH_COMPONENTS } from './constants';
 import { EarthComponent, SphereType } from './types';
@@ -11,6 +12,7 @@ type Tab = 'classifier' | 'interaction';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('classifier');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Lifted State for persistence
   const [items, setItems] = useState<EarthComponent[]>(
@@ -59,6 +61,14 @@ export default function App() {
               분류하기로 돌아가기
             </button>
           )}
+          <button 
+            onClick={() => setIsSettingsOpen(true)}
+            className="p-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl transition-all relative group flex items-center gap-1.5 font-bold text-xs"
+            title="API 설정"
+          >
+            <Settings className="w-4 h-4" />
+            <span className="hidden md:inline">API 설정</span>
+          </button>
           <div className="hidden sm:block px-3 py-1 bg-stone-100 text-stone-500 rounded-lg text-[10px] font-black tracking-widest uppercase">
             Science Room
           </div>
@@ -89,6 +99,9 @@ export default function App() {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      {/* Settings Modal */}
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
 
       {/* Footer (Simplified) */}
       <footer className="flex-shrink-0 py-2 border-t border-stone-100 bg-white/50 px-6">
