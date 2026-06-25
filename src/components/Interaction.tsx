@@ -77,7 +77,7 @@ export default function Interaction({ placedItems }: InteractionProps) {
                 <motion.div 
                   key={key}
                   draggable
-                  onDragStart={(e) => {
+                  onDragStart={(e: any) => {
                     e.dataTransfer.setData('sphereType', key);
                   }}
                   whileHover={{ scale: 1.1 }}
