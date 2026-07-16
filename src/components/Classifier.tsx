@@ -35,6 +35,7 @@ interface ClassifierProps {
   onNext: () => void;
 }
 
+// MOBILE_CLASSIFIER_ORDER_V1
 export default function Classifier({
   items,
   setItems,
@@ -180,7 +181,7 @@ export default function Classifier({
         )}
       </AnimatePresence>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3 flex-none lg:flex-1 lg:min-h-0 lg:overflow-hidden">
+      <div className="order-3 lg:order-none grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3 flex-none lg:flex-1 lg:min-h-0 lg:overflow-hidden">
         {Object.entries(SPHERES).map(([key, sphere]) => {
           const sphereType = key as SphereType;
           const Icon = ICON_MAP[sphere.icon as keyof typeof ICON_MAP];
@@ -267,8 +268,8 @@ export default function Classifier({
         })}
       </div>
 
-      <div className="flex flex-col gap-2.5 sm:gap-4 flex-shrink-0">
-        <section className="bg-stone-50 p-2.5 sm:p-4 rounded-2xl sm:rounded-[32px] border border-stone-200 max-h-[220px] lg:min-h-[100px] lg:max-h-[145px] shadow-inner overflow-y-auto custom-scrollbar">
+      <div className="contents lg:flex lg:flex-col lg:gap-4 lg:flex-shrink-0">
+        <section className="order-2 lg:order-none bg-stone-50 p-2.5 sm:p-4 rounded-2xl sm:rounded-[32px] border border-stone-200 max-h-[220px] lg:min-h-[100px] lg:max-h-[145px] shadow-inner overflow-y-auto custom-scrollbar">
           <div className="flex flex-wrap gap-2 justify-center relative z-10">
             <AnimatePresence mode="popLayout">
               {items.map((item) => {
@@ -305,7 +306,7 @@ export default function Classifier({
           </div>
         </section>
 
-        <div className="flex flex-col xl:flex-row items-stretch xl:items-center gap-2.5 sm:gap-4 bg-white p-2.5 sm:p-4 rounded-2xl sm:rounded-[28px] border border-stone-100 shadow-lg">
+        <div className="order-4 lg:order-none flex flex-col xl:flex-row items-stretch xl:items-center gap-2.5 sm:gap-4 bg-white p-2.5 sm:p-4 rounded-2xl sm:rounded-[28px] border border-stone-100 shadow-lg">
           <form onSubmit={addNewItem} className="flex-1 min-w-0 flex gap-2 bg-stone-50 p-1.5 rounded-2xl border border-stone-100">
             <input
               value={newItemName}
