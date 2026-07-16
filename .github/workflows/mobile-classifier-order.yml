@@ -1,0 +1,71 @@
+name: Fix mobile classifier order
+
+on:
+  push:
+    branches:
+      - responsive-preview
+    paths:
+      - '.github/workflows/mobile-classifier-order.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: responsive-preview
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Move item pool above sphere zones on small screens
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/components/Classifier.tsx')
+          text = path.read_text(encoding='utf-8')
+          marker = 'MOBILE_CLASSIFIER_ORDER_V1'
+          if marker in text:
+              print('Already applied')
+              raise SystemExit(0)
+
+          replacements = {
+              'className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3 flex-none lg:flex-1 lg:min-h-0 lg:overflow-hidden"':
+              'className="order-3 lg:order-none grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3 flex-none lg:flex-1 lg:min-h-0 lg:overflow-hidden"',
+              'className="flex flex-col gap-2.5 sm:gap-4 flex-shrink-0"':
+              'className="contents lg:flex lg:flex-col lg:gap-4 lg:flex-shrink-0"',
+              'className="bg-stone-50 p-2.5 sm:p-4 rounded-2xl sm:rounded-[32px] border border-stone-200 max-h-[220px] lg:min-h-[100px] lg:max-h-[145px] shadow-inner overflow-y-auto custom-scrollbar"':
+              'className="order-2 lg:order-none bg-stone-50 p-2.5 sm:p-4 rounded-2xl sm:rounded-[32px] border border-stone-200 max-h-[220px] lg:min-h-[100px] lg:max-h-[145px] shadow-inner overflow-y-auto custom-scrollbar"',
+              'className="flex flex-col xl:flex-row items-stretch xl:items-center gap-2.5 sm:gap-4 bg-white p-2.5 sm:p-4 rounded-2xl sm:rounded-[28px] border border-stone-100 shadow-lg"':
+              'className="order-4 lg:order-none flex flex-col xl:flex-row items-stretch xl:items-center gap-2.5 sm:gap-4 bg-white p-2.5 sm:p-4 rounded-2xl sm:rounded-[28px] border border-stone-100 shadow-lg"',
+          }
+
+          for old, new in replacements.items():
+              if old not in text:
+                  raise SystemExit(f'Missing expected class: {old}')
+              text = text.replace(old, new, 1)
+
+          text = text.replace(
+              'export default function Classifier({',
+              '// MOBILE_CLASSIFIER_ORDER_V1\nexport default function Classifier({',
+              1,
+          )
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Commit patch
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo 'No changes'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/components/Classifier.tsx
+          git commit -m '모바일에서 분류 카드 목록을 권역 위로 이동'
+          git push origin responsive-preview
