@@ -269,8 +269,19 @@ export default function Classifier({
       </div>
 
       <div className="contents lg:flex lg:flex-col lg:gap-4 lg:flex-shrink-0">
-        <section className="order-2 lg:order-none bg-stone-50 p-2.5 sm:p-4 rounded-2xl sm:rounded-[32px] border border-stone-200 max-h-[220px] lg:min-h-[100px] lg:max-h-[145px] shadow-inner overflow-y-auto custom-scrollbar">
-          <div className="flex flex-wrap gap-2 justify-center relative z-10">
+        <section
+          className="order-2 lg:order-none shrink-0 bg-stone-50 p-2.5 sm:p-4 rounded-2xl sm:rounded-[32px] border border-stone-200 min-h-[176px] max-h-[248px] lg:min-h-[100px] lg:max-h-[145px] shadow-inner overflow-y-auto custom-scrollbar"
+          aria-labelledby="unplaced-cards-title"
+        >
+          <div className="lg:hidden flex items-center justify-between gap-3 px-1 mb-2.5">
+            <h3 id="unplaced-cards-title" className="text-xs font-black text-stone-700">
+              분류할 카드
+            </h3>
+            <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+              {items.length}개 남음
+            </span>
+          </div>
+          <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-2 sm:justify-center relative z-10">
             <AnimatePresence mode="popLayout">
               {items.map((item) => {
                 const selected = selectedCard?.item.id === item.id;
@@ -281,24 +292,25 @@ export default function Classifier({
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.5 }}
+                    className="min-w-0"
                   >
                     <div
                       draggable
                       onDragStart={(event) => event.dataTransfer.setData('item', JSON.stringify(item))}
                       onClick={() => selectCard(item)}
                       className={cn(
-                        'bg-white px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl shadow-sm border cursor-grab active:cursor-grabbing transition-all min-w-[88px] sm:min-w-[100px] text-center',
+                        'w-full sm:w-auto bg-white px-2 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl shadow-sm border cursor-grab active:cursor-grabbing transition-all min-w-0 sm:min-w-[100px] text-center',
                         selected ? 'border-blue-500 ring-2 ring-blue-200 shadow-md' : 'border-stone-200 hover:border-blue-400',
                       )}
                     >
-                      <span className="font-black text-xs sm:text-sm text-stone-700 leading-none">{item.name}</span>
+                      <span className="block font-black text-xs sm:text-sm text-stone-700 leading-tight break-keep">{item.name}</span>
                     </div>
                   </motion.div>
                 );
               })}
             </AnimatePresence>
             {items.length === 0 && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3 py-2">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="col-span-3 flex items-center justify-center gap-3 py-2">
                 <CheckCircle2 className="w-6 h-6 text-emerald-600" />
                 <p className="font-black text-stone-800 text-sm">모든 요소를 분류했어요!</p>
               </motion.div>
