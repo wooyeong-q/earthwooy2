@@ -1,13 +1,41 @@
 import { ChatMessage } from "../types";
-import { GoogleGenAI } from "@google/genai";
 
 // Initialize client-side Gemini client lazily if fallback key is provided
-function getClientSideAI() {
+async function getClientSideAI() {
   const apiKey = localStorage.getItem('USER_GEMINI_API_KEY') || (import.meta as any).env?.VITE_GEMINI_API_KEY || (window as any).GEMINI_API_KEY;
   if (apiKey) {
-    return new GoogleGenAI({ apiKey });
+    const { GoogleGenAI } = await import("@google/genai");
+    return new GoogleGenAI({ apiKey, httpOptions: { timeout: 25000 } });
   }
   return null;
+}
+
+// Coalesce identical in-flight requests; keep personalized answers out of shared caches.
+const pendingApi = new Map<string, Promise<{ text?: string }>>();
+function requestApi(path: string, payload: unknown) {
+  const body = JSON.stringify(payload);
+  const key = path + ':' + body;
+  const existing = pendingApi.get(key);
+  if (existing) return existing;
+  const request = (async () => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    try {
+      const response = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+        signal: controller.signal,
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'AI request failed');
+      return data as { text?: string };
+    } finally {
+      clearTimeout(timeout);
+    }
+  })().finally(() => pendingApi.delete(key));
+  pendingApi.set(key, request);
+  return request;
 }
 
 /**
@@ -16,25 +44,15 @@ function getClientSideAI() {
 export async function getAIFeedback(itemName: string, sphereName: string) {
   // First, try secure server-side API call
   try {
-    const res = await fetch("/api/gemini/feedback", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ itemName, sphereName }),
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      return data.text || "멋진 분류네요! 계속 탐구해봐요. 😊";
-    }
+    const data = await requestApi("/api/gemini/feedback", { itemName, sphereName });
+    return data.text || "멋진 분류네요! 계속 탐구해봐요. 😊";
   } catch (serverError) {
     console.warn("Server API not available, trying client-side fallback...", serverError);
   }
 
   // Fallback to direct client-side Gemini call if VITE_GEMINI_API_KEY is available
   try {
-    const ai = getClientSideAI();
+    const ai = await getClientSideAI();
     if (ai) {
       const prompt = `당신은 중학교 과학 교사 '지구쌤'입니다. 
 상황: 학생이 '${itemName}' 요소를 '${sphereName}'권으로 분류했습니다.
@@ -59,25 +77,15 @@ export async function getAIFeedback(itemName: string, sphereName: string) {
 export async function getAIChatResponse(message: string, currentContext?: string, history: ChatMessage[] = []) {
   // First, try secure server-side API call
   try {
-    const res = await fetch("/api/gemini/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ message, currentContext, history }),
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      return data.text || "지구쌤이 잠시 고민 중인가봐요. 다시 한번 말해줄래요?";
-    }
+    const data = await requestApi("/api/gemini/chat", { message, currentContext, history });
+    return data.text || "지구쌤이 잠시 고민 중인가봐요. 다시 한번 말해줄래요?";
   } catch (serverError) {
     console.warn("Server API not available, trying client-side fallback...", serverError);
   }
 
   // Fallback to direct client-side Gemini call if VITE_GEMINI_API_KEY is available
   try {
-    const ai = getClientSideAI();
+    const ai = await getClientSideAI();
     if (ai) {
       const systemInstruction = `당신은 초등/중학생을 가르치는 친절하고 짧게 말하는 과학 선생님 '지구쌤'입니다.
 핵심 규칙:
@@ -117,25 +125,15 @@ export async function getAIChatResponse(message: string, currentContext?: string
 export async function getGlobalEvaluation(placedItems: Record<string, any[]>) {
   // First, try secure server-side API call
   try {
-    const res = await fetch("/api/gemini/evaluation", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ placedItems }),
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      return data.text || "분류 결과를 꼼꼼히 점검해 보았습니다! 전반적으로 아주 잘 진행되었네요. 혹시 헷갈리는 부분이 있다면 다시 한번 살펴볼까요? 👍";
-    }
+    const data = await requestApi("/api/gemini/evaluation", { placedItems });
+    return data.text || "분류 결과를 꼼꼼히 점검해 보았습니다! 전반적으로 아주 잘 진행되었네요. 혹시 헷갈리는 부분이 있다면 다시 한번 살펴볼까요? 👍";
   } catch (serverError) {
     console.warn("Server API not available, trying client-side fallback...", serverError);
   }
 
   // Fallback to direct client-side Gemini call if VITE_GEMINI_API_KEY is available
   try {
-    const ai = getClientSideAI();
+    const ai = await getClientSideAI();
     if (ai) {
       const summary = Object.entries(placedItems)
         .map(([sphere, items]) => `${sphere}: ${items.map(i => i.name).join(", ")}`)

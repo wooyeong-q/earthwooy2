@@ -8,6 +8,7 @@ const getGeminiClient = () => {
   return new GoogleGenAI({
     apiKey: apiKey,
     httpOptions: {
+      timeout: 25000,
       headers: {
         'User-Agent': 'aistudio-build',
       }
