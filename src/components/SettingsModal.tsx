@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Key, HelpCircle, Save, Check, AlertTriangle, RefreshCw, Settings } from 'lucide-react';
-import { GoogleGenAI } from '@google/genai';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -45,7 +44,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     setTestMessage('연결 테스트 중...');
 
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey.trim() });
+      const { GoogleGenAI } = await import('@google/genai');
+      const ai = new GoogleGenAI({ apiKey: apiKey.trim(), httpOptions: { timeout: 25000 } });
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: [{ role: 'user', parts: [{ text: 'Hello, respond with a single word "OK"' }] }],
